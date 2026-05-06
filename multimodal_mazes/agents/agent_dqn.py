@@ -166,10 +166,22 @@ class AgentDQN(nn.Module, Agent):
 
         # Hidden
         new_hidden = self.input_to_hidden(new_input)
-        if self.wm_flags[1]:  # Lateral
-            new_hidden = new_hidden + self.hidden_to_hidden(hidden)
-        if self.wm_flags[6]:  # Feedback
-            new_hidden = new_hidden + self.output_to_hidden(prev_output)
+        if self.wm_flags[1]:  # Lateral (hidden-to-hidden) connections
+            if self.M_hh is not None:
+                # Step 1: Apply the mask to the weight matrix via Hadamard product (W ⊙ M)
+                # self.hidden_to_hidden.weight shape: [n_hidden, n_hidden]
+                masked_weight = self.hidden_to_hidden.weight * self.M_hh
+                
+                # Step 2: Compute linear transformation using the filtered weights
+                # Since bias=False was defined, we pass None as the third argument.
+                # Math: new_hidden = new_hidden + (hidden @ masked_weight.T)
+                new_hidden = new_hidden + torch.nn.functional.linear(
+                    hidden, masked_weight, None
+                )
+            else:
+                # Fallback to standard fully-connected lateral pass if no mask is provided
+                new_hidden = new_hidden + self.hidden_to_hidden(hidden)
+                
         new_hidden = torch.relu(new_hidden)
 
         # Output
