@@ -40,7 +40,16 @@ for name, M_hh in structures.items():
         M_hh=M_hh
     )
 
+    print("=== BEFORE TRAINING ===")
+    print("W_hh requires_grad:", agnt.hidden_to_hidden.weight.requires_grad)
+    print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
+    print("M_hh:\n", agnt.M_hh)
+
     agnt.generate_policy(maze=maze_train, n_steps=50)
+
+    print("=== AFTER TRAINING ===")
+    print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
+    print("M_hh:\n", agnt.M_hh)
 
     results, input_sensitivity, memory = multimodal_mazes.test_dqn_agent(
         maze_test=maze_test,
