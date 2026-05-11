@@ -49,10 +49,10 @@ for name, M_hh in structures.items():
         M_hh=M_hh
     )
 
-    print("=== BEFORE TRAINING ===")
-    print("W_hh requires_grad:", agnt.hidden_to_hidden.weight.requires_grad)
-    print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
-    print("M_hh:\n", agnt.M_hh)
+    # print("=== BEFORE TRAINING ===")
+    # print("W_hh requires_grad:", agnt.hidden_to_hidden.weight.requires_grad)
+    # print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
+    # print("M_hh:\n", agnt.M_hh)
     
    # baby training
    # agnt.generate_policy(maze=maze_train, n_steps=50)
@@ -60,9 +60,9 @@ for name, M_hh in structures.items():
    # HPC training using hyperparameter from paper
     agnt.generate_policy(maze=maze_train, n_steps=20)
 
-    print("=== AFTER TRAINING ===")
-    print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
-    print("M_hh:\n", agnt.M_hh)
+    # print("=== AFTER TRAINING ===")
+    # print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
+    # print("M_hh:\n", agnt.M_hh)
 
     results, input_sensitivity, memory = multimodal_mazes.test_dqn_agent(
         maze_test=maze_test,
