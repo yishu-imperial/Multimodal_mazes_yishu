@@ -1,13 +1,18 @@
 #!/bin/bash  
 #PBS -l select=1:ncpus=1:mem=8gb
-#PBS -l walltime=8:00:00
+#PBS -l walltime=28:00:00
 #PBS -J 1-129
 #PBS -o ./ologs 
 #PBS -e ./elogs
 
-cd $PBS_O_WORKDIR
+# cd $PBS_O_WORKDIR
+cd ~/Multimodal_mazes
 
-module load anaconda3/personal
-source activate Multimodal_mazes
+# module load anaconda3/personal
+# source activate Multimodal_mazes
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate Multimodal_mazes
 
-python DQN_exp.py
+# python DQN_exp.py
+# python test_mask.py
+python test_mask_multiple_tasks.py
