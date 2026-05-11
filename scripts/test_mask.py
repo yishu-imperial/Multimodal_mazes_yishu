@@ -8,7 +8,8 @@ wm_flags_standard_recurrent = np.array([0, 1, 0, 0, 0, 0, 0])
 
 exp_config = {
     "channels": [1, 1],
-    "n_steps": 50,
+    # baby training "n_steps": 50,
+    "n_steps": 20,
 }
 
 # --- 2. Define multiple M_hh structures ---
@@ -20,10 +21,18 @@ structures = {
 
 # --- 3. Environment Setup ---
 maze_train = multimodal_mazes.GeneralMaze(size=9, n_channels=2)
-maze_train.generate(number=1000)
+# baby training
+# maze_train.generate(number=1000)
+
+# HPC training using hyperparameter from paper
+maze_train.generate(number=400000) 
 
 maze_test = multimodal_mazes.GeneralMaze(size=9, n_channels=2)
-maze_test.generate(number=100)
+# baby training
+#maze_test.generate(number=100)
+
+# HPC training using hyperparameter from paper
+maze_test.generate(number=1000)
 
 # --- 4. Run each structure ---
 all_results = {}
@@ -44,8 +53,12 @@ for name, M_hh in structures.items():
     print("W_hh requires_grad:", agnt.hidden_to_hidden.weight.requires_grad)
     print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
     print("M_hh:\n", agnt.M_hh)
+    
+   # baby training
+   # agnt.generate_policy(maze=maze_train, n_steps=50)
 
-    agnt.generate_policy(maze=maze_train, n_steps=50)
+   # HPC training using hyperparameter from paper
+    agnt.generate_policy(maze=maze_train, n_steps=20)
 
     print("=== AFTER TRAINING ===")
     print("W_hh:\n", agnt.hidden_to_hidden.weight.data)
