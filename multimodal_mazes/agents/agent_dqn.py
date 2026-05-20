@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 class AgentDQN(nn.Module, Agent):
     def __init__(
-        self, location, channels, sensor_noise_scale, n_hidden_units, wm_flags
+        self, location, channels, sensor_noise_scale, n_hidden_units, wm_flags, M_hh = None
     ):
         """
         Creates a DQN agent.
@@ -23,6 +23,7 @@ class AgentDQN(nn.Module, Agent):
             sensor_noise_scale: the scale of the noise applied to every sensor.
             n_hidden_units: the number of units in the hidden layer.
             wm_flags: a 7 element binary vector, which includes or excludes each additional weight matrix.
+            M_hh: optional parameter: masking matrix.
         """
 
         # Set up
@@ -32,6 +33,13 @@ class AgentDQN(nn.Module, Agent):
         self.type = "AgentDQN"
         self.sensor_noise_scale = sensor_noise_scale
         self.wm_flags = wm_flags
+        # Register the lateral connection mask if provided
+        if M_hh is not None:
+            # Convert to tensor and register as a buffer to ensure it moves with the model (CPU/GPU)
+            # without being treated as a trainable parameter.
+            self.register_buffer('M_hh', torch.as_tensor(M_hh, dtype=torch.float32))
+        else:
+            self.M_hh = None
 
         # Units
         self.n_input_units = len(self.channel_inputs.reshape(-1))
