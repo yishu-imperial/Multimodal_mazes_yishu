@@ -1,7 +1,7 @@
 #!/bin/bash  
 #PBS -l select=1:ncpus=1:mem=8gb
-#PBS -l walltime=28:00:00
-#PBS -J 1-129
+#PBS -l walltime=8:00:00
+#PBS -J 1-3
 #PBS -o ./ologs 
 #PBS -e ./elogs
 
@@ -15,4 +15,4 @@ conda activate Multimodal_mazes
 
 # python DQN_exp.py
 # python test_mask.py
-python test_mask_multiple_tasks.py
+python test_mask_array.py
