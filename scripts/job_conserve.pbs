@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -l walltime=24:00:00
+#PBS -o ./ologs
+#PBS -e ./elogs
+
+cd ~/Multimodal_mazes
+
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate Multimodal_mazes
+
+python test_reciprocity_init_training.py --conserve true
