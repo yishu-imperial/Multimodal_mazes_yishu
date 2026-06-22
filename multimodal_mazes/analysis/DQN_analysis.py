@@ -196,6 +196,49 @@ def calculate_dqn_memory(all_states, agnt, n_steps):
     return np.array(tmp)
 
 
+def calculate_dqn_effective_spectrum(all_states, agnt):
+    """
+    Calculate the effective recurrent eigen-spectrum (nonlinearity included).
+        For each time point, the recurrent Jacobian d h_t / d h_{t-1}
+        = diag(relu')·(W_hh ⊙ M_hh) is obtained by autodiff; its |eigenvalues|
+        are sorted (descending) and then averaged over all steps.
+
+    NOTE - two DIFFERENT tuples are involved, with DIFFERENT orderings:
+      * recorded state `st` (5-tuple, recorded in maze_trial.py):
+            st[0] = channel_inputs (current input x_t)
+            st[1] = prev_input
+            st[2] = hidden        (h_{t-1}, the state going INTO this step; post-ReLU)
+            st[3] = prev_output
+            st[4] = outputs       (current output y_t)
+      * agnt.forward() return (4-tuple, agent_dqn.py line ~223):
+            [0] = output, [1] = new_input, [2] = new_hidden (h_t), [3] = output
+        => we read the inputs from st[0]/st[1]/st[3], but take h_t from forward()[2].
+    (tensor_input=True: st elements are already torch tensors -> use them directly,
+     do not convert from numpy; also needed so autograd can flow.)
+
+    Arguments:
+        all_states: a list containing a list per trial; each of which contains
+            a tuple per time point of the agent's states.
+        agnt: an instance of a DQN agent.
+    Returns:
+        a length n_hidden numpy vector of |lambda| (sorted descending), averaged
+        over all steps. Element [0] is the effective spectral radius.
+    """
+    specs = []
+    for trial in all_states:                                 # per maze
+        for st in trial:                                     # per time-point (5-tuple)
+            agnt.channel_inputs = st[0]                      # st[0] = current input x_t (fixed)
+
+            def fwd_h(h, _st=st):                            # h_{t-1} -> h_t
+                # forward(prev_input=st[1], hidden=h, prev_output=st[3]); [2]=new_hidden=h_t
+                return agnt.forward(_st[1], h, _st[3], tensor_input=True)[2]
+
+            jm = jacobian(fwd_h, st[2])                      # d h_t / d h_{t-1}, at h_{t-1}=st[2]
+            specs.append(np.sort(torch.linalg.eigvals(jm).abs().numpy())[::-1])
+
+    return np.mean(specs, axis=0) if specs else np.zeros(agnt.n_hidden_units)
+
+
 def calculate_dqn_w_norms(agnt):
     """
     Calculate the norm of each weight matrix in a DQN model.
@@ -260,3 +303,4 @@ def compute_counterfactual_effects(X, y):
             f1[i].append(match_idx)
 
     return np.array(counterfactual_effects).T, np.array(f0).T, np.array(f1).T
+
