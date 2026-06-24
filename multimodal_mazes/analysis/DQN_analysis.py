@@ -196,12 +196,19 @@ def calculate_dqn_memory(all_states, agnt, n_steps):
     return np.array(tmp)
 
 
-def calculate_dqn_effective_spectrum(all_states, agnt):
+def calculate_dqn_effective_spectrum(all_states, agnt, return_distribution=False):
     """
     Calculate the effective recurrent eigen-spectrum (nonlinearity included).
         For each time point, the recurrent Jacobian d h_t / d h_{t-1}
         = diag(relu')·(W_hh ⊙ M_hh) is obtained by autodiff; its |eigenvalues|
         are sorted (descending) and then averaged over all steps.
+
+    return_distribution=False (default): returns the mean sorted spectrum (back-compatible).
+    return_distribution=True: returns a dict that ALSO keeps the PER-STATE |lambda| (every
+        eigenvalue at every step, not just the mean), so the |lambda| DISTRIBUTION / spread
+        can be studied. dict keys:
+          "mean_spectrum"     : length-n mean sorted |lambda| (== the back-compatible return)
+          "lambdas_per_state" : float32 array (n_states, n) of sorted-desc |lambda| per step
 
     NOTE - two DIFFERENT tuples are involved, with DIFFERENT orderings:
       * recorded state `st` (5-tuple, recorded in maze_trial.py):
@@ -236,7 +243,12 @@ def calculate_dqn_effective_spectrum(all_states, agnt):
             jm = jacobian(fwd_h, st[2])                      # d h_t / d h_{t-1}, at h_{t-1}=st[2]
             specs.append(np.sort(torch.linalg.eigvals(jm).abs().numpy())[::-1])
 
-    return np.mean(specs, axis=0) if specs else np.zeros(agnt.n_hidden_units)
+    mean_spectrum = np.mean(specs, axis=0) if specs else np.zeros(agnt.n_hidden_units)
+    if not return_distribution:
+        return mean_spectrum
+    per_state = (np.asarray(specs, dtype=np.float32) if specs
+                 else np.zeros((0, agnt.n_hidden_units), np.float32))   # (n_states, n)
+    return {"mean_spectrum": mean_spectrum, "lambdas_per_state": per_state}
 
 
 def calculate_dqn_w_norms(agnt):
