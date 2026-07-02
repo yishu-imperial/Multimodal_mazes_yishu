@@ -5,7 +5,6 @@
 #     h(t)   = A x(t) + B h(t-1) + W m(t-1)                (LINEAR, ReLU or not depends on relu_state)
 #     y(t)   = C h(t)                                      (softmax readout)
 # Fixed (constant): M_in, M_h (=I_n), M_m (shift).  Learned: A, B, W, C.
-# See notes/delay_line_memory_ssm.md for the design + why it is a simplified SSM.
 
 import numpy as np
 import torch
