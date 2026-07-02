@@ -2,7 +2,7 @@
 #
 # Adds an explicit memory buffer m(t) that stores the last T steps of (x, h):
 #     m(t)   = M_in x(t) + M_h h(t) + M_m m(t-1)          (M_* fixed / not learned)
-#     h(t)   = A x(t) + B h(t-1) + W m(t-1)                (LINEAR, no ReLU)
+#     h(t)   = A x(t) + B h(t-1) + W m(t-1)                (LINEAR, ReLU or not depends on relu_state)
 #     y(t)   = C h(t)                                      (softmax readout)
 # Fixed (constant): M_in, M_h (=I_n), M_m (shift).  Learned: A, B, W, C.
 # See notes/delay_line_memory_ssm.md for the design + why it is a simplified SSM.
